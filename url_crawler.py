@@ -14,6 +14,7 @@ def main():
 
     driver.get('http://www.naver.com')
     time.sleep(5)
+    print driver.current_url
     driver.quit()
 
 if __name__ == '__main__':
