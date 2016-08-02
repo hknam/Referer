@@ -7,8 +7,9 @@ def main():
     current_path = os.getcwd().split('/')[1]
     if current_path == 'home':
         driver_path = 'chromedriver/chromedriver_linux'
-    elif current_path == 'User':
+    elif current_path == 'Users':
         driver_path = 'chromedriver/chromedriver_mac'
+
 
     driver = webdriver.Chrome(driver_path)
 
@@ -16,7 +17,7 @@ def main():
     time.sleep(5)
     print driver.current_url
     driver.quit()
-
+    
 if __name__ == '__main__':
     main()
 
