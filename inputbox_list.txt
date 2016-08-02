@@ -1,1 +1,1 @@
-search,q,query,p
+search,q,query,p,search_query

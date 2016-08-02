@@ -55,8 +55,8 @@ def crawl_country_category():
 
 
 def main():
-    #crawl_global()
-    crawl_country_category()
+    crawl_global()
+    #crawl_country_category()
 
 
 if __name__ == '__main__':

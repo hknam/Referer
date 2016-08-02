@@ -90,3 +90,6 @@ ENV/
 
 # Alexa page list
 .txt
+
+# pcap directory
+pcapfile/
