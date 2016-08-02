@@ -40,11 +40,14 @@ def input_text_box(driver, classname):
             print boxname
             continue
 
+    link = driver.find_element_by_css_selector('a').get_attribute('href')
+    driver.get(linkG)
+
     f.close()
     time.sleep(10)
 
 def main():
-    page = 'http://www.yahoo.com'
+    page = 'http://www.google.com'
     driver = init_driver()
 
     open_chrome(driver, page)
