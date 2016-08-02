@@ -2,6 +2,7 @@ from selenium import webdriver
 import time
 import os
 import urllib
+from bs4 import BeautifulSoup
 
 def init_driver():
     driver_path = ''
@@ -24,6 +25,20 @@ def close_chrome(driver):
     driver.quit()
 
 
+def get_http_link(driver, pageurl):
+    url_open = urllib.urlopen(pageurl)
+    soup = BeautifulSoup(url_open, 'html.parser')
+    main_div = soup.find('div')
+    link_list = main_div.findAll('a')
+
+    for link in link_list:
+        if str(link['href']).startswith('http://'):
+            http_link = link['href']
+            driver.get(http_link)
+            time.sleep(10)
+
+
+
 
 def input_text_box(driver, classname):
     f=open('inputbox_list.txt', 'r')
@@ -40,8 +55,10 @@ def input_text_box(driver, classname):
             print boxname
             continue
 
-    link = driver.find_element_by_css_selector('a').get_attribute('href')
-    driver.get(linkG)
+    #link = driver.find_element_by_css_selector('a').get_attribute('href')
+    get_http_link(driver, driver.current_url)
+
+
 
     f.close()
     time.sleep(10)
