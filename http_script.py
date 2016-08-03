@@ -73,8 +73,11 @@ def main():
         page = f.readline()
         if not page:
             break
-        file_name = page.split('.')[0]+'.pcap'
-        #os.system('sudo tcpdump -i enp0s31f6 -s pcapfile/'+page.split('.')[0]+'.pcap')
+        file_name = 'pcapfile/'+page.split('.')[0]+'.pcap'
+        tcpdump_command = 'sudo tcpdump -i any -s '+file_name
+
+        subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
+
         page = 'http://www.'+page.lower()
         input_text_box(driver, page)
 
