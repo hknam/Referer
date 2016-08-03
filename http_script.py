@@ -3,6 +3,7 @@ import time
 import os
 import urllib
 from bs4 import BeautifulSoup
+import subprocess
 
 def init_driver():
     driver_path = ''
@@ -72,7 +73,8 @@ def main():
         page = f.readline()
         if not page:
             break
-        os.system('sudo tcpdump -i enp0s31f6 -s pcapfile/'+page.split('.')[0]+'.pcap')
+        file_name = page.split('.')[0]+'.pcap'
+        #os.system('sudo tcpdump -i enp0s31f6 -s pcapfile/'+page.split('.')[0]+'.pcap')
         page = 'http://www.'+page.lower()
         input_text_box(driver, page)
 
