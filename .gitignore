@@ -93,3 +93,6 @@ ENV/
 
 # pcap directory
 pcapfile/
+
+# pcap file
+.pcap
