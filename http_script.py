@@ -5,6 +5,8 @@ import urllib
 from bs4 import BeautifulSoup
 import subprocess
 import sys
+import json
+
 
 
 
@@ -24,7 +26,7 @@ def init_driver():
 
 
 
-def input_text_box(driver, page, inputbox_list, result, error_list):
+def input_text_box(driver, page, inputbox_list, result, error_list, data, event):
     driver.get(page)
     browser_url = ''
     for boxname in inputbox_list.split(","):
@@ -35,24 +37,36 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
             search_box.send_keys('Galaxy Note 7')
             search_box.submit()
 
-            browser_url = driver.current_url
+            page = page.replace('\n', '')
+            browser_url = str(driver.current_url)
             result.write(page+','+browser_url+'\n')
             print browser_url
-            '''
+            event['browser_url'] = browser_url
+
             links = driver.find_elements_by_xpath('//*[@href]')
 
             for link in links:
                 href = link.get_attribute('href')
                 if href.startswith('http://'):
                     print href
-            '''
+                    event['http_url'] = href
+                    break
+            if len(event['http_url']) == 0:
+                event['http_url'] = 'error'
+
+
         except Exception as e:
             #print boxname
             continue
 
+
     if not browser_url:
         print 'error : ', page
         error_list.write(page)
+        event['browser_url'] = 'error'
+        event['http_url'] = 'error'
+
+    data[page] = event
 
 def main():
     driver_path = ''
@@ -90,11 +104,19 @@ def main():
 
     #driver = webdriver.Chrome(driver_path)
     #driver = webdriver.Firefox()
-    f=open('country/South Korea.txt', 'r')
+
     inputbox_file = open('inputbox_list.txt', 'r')
-    error_list = open('error_list.txt', 'w')
-    result = open('result.txt', 'w')
+    f = open('country/South Korea.txt', 'r')
+
+
+    error_list = open('error_list_'+browser+'.txt', 'w')
+    result = open('result_'+browser+'.txt', 'w')
+
+
     inputbox_list = inputbox_file.readline()
+
+    data = {}
+    event = {}
 
     while True:
 
@@ -102,19 +124,28 @@ def main():
         if not page:
             break
 
-        file_name = 'pcapfile/'+page.split('.')[0]+'.pcap'
-        tcpdump_command = 'sudo tcpdump -i any -s 0 -w '+file_name
+        file_name = 'pcapfile/'+browser+'/'+page.split('.')[0]+'_'+browser+'.pcap'
+        tcpdump_command = 'sudo tcpdump -i any -s 0 -c 5000 -w '+file_name
 
-        tcpdump_process = subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
+        subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
 
         page = 'http://www.'+page.lower()
-        input_text_box(driver, page, inputbox_list, result, error_list)
+        input_text_box(driver, page, inputbox_list, result, error_list, data, event)
 
-        tcpdump_process.terminate()
+        #input_text_box(driver, page, inputbox_list, data, event)
+        #tcpdump_process.kill()
+        #tcpdump_process.terminate()
         time.sleep(1)
 
-    f.close()
+
+
+    with open('result_'+browser+'.json', 'w') as outfile:
+        outfile.write(json.dumps(data))
+
     inputbox_file.close()
+    f.close()
+
+
     result.close()
     error_list.close()
 
