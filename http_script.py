@@ -45,18 +45,21 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
                 href = link.get_attribute('href')
                 src_page=page.split('.')[1]
                 if href.startswith('http://'):
+<<<<<<< HEAD
                     if href.find(src_page) < 0:
                         print href
                         link.click()
                         time.sleep(1)
                         break
+=======
+                    print href
+                    driver.get(href)
+                    break
+>>>>>>> fc56e9b65fde7d1395a88efc315abf293b09be03
 
         except Exception as e:
         # print boxname
-            try:
-                search_box = driver.find_element_by_id(boxname)
-            except Exception as e:
-                continue
+            continue
 
 def run(target, p_list):
     try:
@@ -156,7 +159,7 @@ def main():
         sys.exit(1)
 
     inputbox_file = open('inputbox_list.txt', 'r')
-    f = open('country/South Korea.txt', 'r')
+    page_list = open('country/South Korea.txt', 'r')
 
 
     error_list = open('error_list_'+browser+'.txt', 'w')
@@ -168,7 +171,7 @@ def main():
 
     while True:
 
-        page = f.readline()
+        page = page_list.readline()
         if not page:
             break
 
@@ -182,12 +185,16 @@ def main():
 
 
         time.sleep(1)
+<<<<<<< HEAD
         run(file_name, p_list)
         break
 
+=======
+        break
+>>>>>>> fc56e9b65fde7d1395a88efc315abf293b09be03
 
     inputbox_file.close()
-    f.close()
+    page_list.close()
 
 
     result.close()
