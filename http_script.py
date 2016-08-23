@@ -26,22 +26,23 @@ def init_driver():
 
 
 
-def input_text_box(driver, page, inputbox_list, result, error_list, data, event):
+def input_text_box(driver, page, inputbox_list, result, error_list):
     driver.get(page)
     browser_url = ''
     for boxname in inputbox_list.split(","):
         boxname = boxname.replace('\n', '')
         try:
             search_box = driver.find_element_by_name(boxname)
+
+
             search_box.clear()
-            search_box.send_keys('Galaxy Note 7')
+            search_box.send_keys('iphone7')
             search_box.submit()
 
             page = page.replace('\n', '')
             browser_url = str(driver.current_url)
             result.write(page+','+browser_url+'\n')
             print browser_url
-            event['browser_url'] = browser_url
 
             links = driver.find_elements_by_xpath('//*[@href]')
 
@@ -49,24 +50,14 @@ def input_text_box(driver, page, inputbox_list, result, error_list, data, event)
                 href = link.get_attribute('href')
                 if href.startswith('http://'):
                     print href
-                    event['http_url'] = href
-                    break
-            if len(event['http_url']) == 0:
-                event['http_url'] = 'error'
-
 
         except Exception as e:
-            #print boxname
-            continue
+        # print boxname
+            try:
+                search_box = driver.find_element_by_id(boxname)
+            except Exception as e:
+                continue
 
-
-    if not browser_url:
-        print 'error : ', page
-        error_list.write(page)
-        event['browser_url'] = 'error'
-        event['http_url'] = 'error'
-
-    data[page] = event
 
 def main():
     driver_path = ''
@@ -115,8 +106,6 @@ def main():
 
     inputbox_list = inputbox_file.readline()
 
-    data = {}
-    event = {}
 
     while True:
 
@@ -125,20 +114,16 @@ def main():
             break
 
         file_name = 'pcapfile/'+browser+'/'+page.split('.')[0]+'_'+browser+'.pcap'
-        tcpdump_command = 'sudo tcpdump -i any -s 0 tcp port 80 -c 2 000 -w '+file_name
+        tcpdump_command = 'sudo tcpdump -i any -s 0 tcp port 80 -c 2000 -w '+file_name
 
         subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
 
         page = 'http://www.'+page.lower()
-        input_text_box(driver, page, inputbox_list, result, error_list, data, event)
+        input_text_box(driver, page, inputbox_list, result, error_list)
 
 
         time.sleep(1)
 
-
-
-    with open('result_'+browser+'.json', 'w') as outfile:
-        outfile.write(json.dumps(data))
 
     inputbox_file.close()
     f.close()
