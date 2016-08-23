@@ -42,7 +42,6 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
             page = page.replace('\n', '')
             browser_url = str(driver.current_url)
             result.write(page+','+browser_url+'\n')
-            print browser_url
 
             links = driver.find_elements_by_xpath('//*[@href]')
 
@@ -50,6 +49,7 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
                 href = link.get_attribute('href')
                 if href.startswith('http://'):
                     print href
+                    driver.get(href)
 
         except Exception as e:
         # print boxname
