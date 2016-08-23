@@ -50,13 +50,11 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
                 if href.startswith('http://'):
                     print href
                     driver.get(href)
+                    break
 
         except Exception as e:
         # print boxname
-            try:
-                search_box = driver.find_element_by_id(boxname)
-            except Exception as e:
-                continue
+            continue
 
 
 def main():
@@ -97,7 +95,7 @@ def main():
     #driver = webdriver.Firefox()
 
     inputbox_file = open('inputbox_list.txt', 'r')
-    f = open('country/South Korea.txt', 'r')
+    page_list = open('country/South Korea.txt', 'r')
 
 
     error_list = open('error_list_'+browser+'.txt', 'w')
@@ -109,7 +107,7 @@ def main():
 
     while True:
 
-        page = f.readline()
+        page = page_list.readline()
         if not page:
             break
 
@@ -123,10 +121,10 @@ def main():
 
 
         time.sleep(1)
-
+        break
 
     inputbox_file.close()
-    f.close()
+    page_list.close()
 
 
     result.close()

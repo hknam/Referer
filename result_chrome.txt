@@ -1,7 +1,1 @@
 http://www.naver.com,https://search.naver.com/search.naver?where=nexearch&query=iphone7&sm=top_hty&fbm=0&ie=utf8
-http://www.google.co.kr,https://www.google.co.kr/?gws_rd=ssl#q=iphone7
-http://www.google.com,https://www.google.co.kr/?gfe_rd=cr&ei=1wS8V5STE5DM8geZjISgBg&gws_rd=ssl#q=iphone7
-http://www.youtube.com,https://www.youtube.com/results?search_query=iphone7
-http://www.daum.net,http://search.daum.net/search?w=tot&DA=YZR&t__nil_searchbox=btn&sug=&sugo=&q=iphone7
-http://www.tistory.com,http://www.tistory.com/
-http://www.amazon.com,https://www.amazon.com/s/ref=nb_sb_noss/156-4372413-4641932?url=search-alias%3Daps&field-keywords=iphone7
