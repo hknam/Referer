@@ -125,16 +125,14 @@ def main():
             break
 
         file_name = 'pcapfile/'+browser+'/'+page.split('.')[0]+'_'+browser+'.pcap'
-        tcpdump_command = 'sudo tcpdump -i any -s 0 -c 5000 -w '+file_name
+        tcpdump_command = 'sudo tcpdump -i any -s 0 tcp port 80 -c 2 000 -w '+file_name
 
         subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
 
         page = 'http://www.'+page.lower()
         input_text_box(driver, page, inputbox_list, result, error_list, data, event)
 
-        #input_text_box(driver, page, inputbox_list, data, event)
-        #tcpdump_process.kill()
-        #tcpdump_process.terminate()
+
         time.sleep(1)
 
 
