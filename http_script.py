@@ -22,17 +22,15 @@ def init_driver():
 
 
 
-def input_text_box(driver, page, inputbox_list, result, error_list):
+def input_text_box(driver, page, inputbox_list, result, error_list, query):
     driver.get(page)
     browser_url = ''
     for boxname in inputbox_list.split(","):
         boxname = boxname.replace('\n', '')
         try:
             search_box = driver.find_element_by_name(boxname)
-
-
             search_box.clear()
-            search_box.send_keys('iphone7')
+            search_box.send_keys(query)
             search_box.submit()
 
             page = page.replace('\n', '')
@@ -45,23 +43,17 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
                 href = link.get_attribute('href')
                 src_page=page.split('.')[1]
                 if href.startswith('http://'):
-<<<<<<< HEAD
                     if href.find(src_page) < 0:
                         print href
                         link.click()
                         time.sleep(1)
                         break
-=======
-                    print href
-                    driver.get(href)
-                    break
->>>>>>> fc56e9b65fde7d1395a88efc315abf293b09be03
 
         except Exception as e:
         # print boxname
             continue
 
-def run(target, p_list):
+def run(target, p_list, query):
     try:
         pkt = rdpcap(target)
     except MemoryError:
@@ -89,14 +81,14 @@ def run(target, p_list):
 
 
             if layerName == "Raw":
-                result = processHTTP(layer.load)
+                result = processHTTP(layer.load, query)
                 for k,v in result.items():
                     p_dict[k] = v
             layer = layer.payload
             if p_dict.has_key('http'):
                 p_list.append(p_dict)
 
-def processHTTP(data):
+def processHTTP(data, query):
     info = dict()
     headers = str(data).splitlines()
     for header in headers:
@@ -115,7 +107,9 @@ def processHTTP(data):
         if header.startswith('User-Agent') : info['user-agent'] = header.split(':',1)[1]
         if header.startswith('Referer') :
             info['referer'] = header.split(':',1)[1]
-            print info['referer']
+            #print info['referer']
+            if str(info['referer']).find(query) > 0:
+                print info['referer']
 
     return info
 
@@ -167,7 +161,7 @@ def main():
 
 
     inputbox_list = inputbox_file.readline()
-
+    query = 'iphone7'
 
     while True:
 
@@ -181,19 +175,13 @@ def main():
         subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
 
         page = 'http://www.'+page.lower()
-        input_text_box(driver, page, inputbox_list, result, error_list)
+        input_text_box(driver, page, inputbox_list, result, error_list, query)
 
 
         time.sleep(1)
-<<<<<<< HEAD
-        run(file_name, p_list)
+        run(file_name, p_list, query)
         break
 
-=======
-        break
->>>>>>> fc56e9b65fde7d1395a88efc315abf293b09be03
-
-    inputbox_file.close()
     page_list.close()
 
 
