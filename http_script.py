@@ -1,11 +1,9 @@
 from selenium import webdriver
 import time
 import os
-import urllib
-from bs4 import BeautifulSoup
 import subprocess
 import sys
-import json
+from scapy.all import *
 
 
 
@@ -21,8 +19,6 @@ def init_driver():
 
     driver = webdriver.Chrome(driver_path)
     return driver
-
-
 
 
 
@@ -42,14 +38,18 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
             page = page.replace('\n', '')
             browser_url = str(driver.current_url)
             result.write(page+','+browser_url+'\n')
-            print browser_url
 
             links = driver.find_elements_by_xpath('//*[@href]')
 
             for link in links:
                 href = link.get_attribute('href')
+                src_page=page.split('.')[1]
                 if href.startswith('http://'):
-                    print href
+                    if href.find(src_page) < 0:
+                        print href
+                        link.click()
+                        time.sleep(1)
+                        break
 
         except Exception as e:
         # print boxname
@@ -58,9 +58,71 @@ def input_text_box(driver, page, inputbox_list, result, error_list):
             except Exception as e:
                 continue
 
+def run(target, p_list):
+    try:
+        pkt = rdpcap(target)
+    except MemoryError:
+        print "Sorry - Memory Error"
+        sys.exit()
+    numPkt = len(pkt)
+
+    print "Analyzing : " + target
+    print "Total Packets: %d\n" % numPkt\
+
+    for packet in pkt:
+        layer = packet.payload
+        p_dict = dict()
+        while layer:
+            layerName = layer.name
+            if layerName == "IP":
+                p_dict['srcip'] = layer.src
+                p_dict['desip'] = layer.dst
+            if layerName == "TCP":
+                p_dict['sport'] = layer.sport
+                p_dict['dport'] = layer.dport
+                p_dict['seq'] = layer.seq
+                p_dict['ack'] = layer.ack
+                p_dict['flags'] = layer.flags
+
+
+            if layerName == "Raw":
+                result = processHTTP(layer.load)
+                for k,v in result.items():
+                    p_dict[k] = v
+            layer = layer.payload
+            if p_dict.has_key('http'):
+                p_list.append(p_dict)
+
+def processHTTP(data):
+    info = dict()
+    headers = str(data).splitlines()
+    for header in headers:
+        if header.startswith('GET'):
+            info['http']='request'
+            info['method']=header.split()[0]
+            info['uri']=header.split()[1]
+        if header.startswith('POST'):
+            info['http']='request'
+            info['method']=header.split()[0]
+            info['uri']=header.split()[1]
+        if header.startswith('HTTP'):
+            info['http']='response'
+            info['status']=header.split()[1]
+        if header.startswith('HOST') : info['host'] = header.split(':')[1]
+        if header.startswith('User-Agent') : info['user-agent'] = header.split(':',1)[1]
+        if header.startswith('Referer') :
+            info['referer'] = header.split(':',1)[1]
+            print info['referer']
+
+    return info
+
+
+
 
 def main():
     driver_path = ''
+    p_list = []
+
     current_path = os.getcwd().split('/')[1]
 
     if current_path == 'home':
@@ -93,9 +155,6 @@ def main():
         print 'Webdriver open error'
         sys.exit(1)
 
-    #driver = webdriver.Chrome(driver_path)
-    #driver = webdriver.Firefox()
-
     inputbox_file = open('inputbox_list.txt', 'r')
     f = open('country/South Korea.txt', 'r')
 
@@ -123,6 +182,8 @@ def main():
 
 
         time.sleep(1)
+        run(file_name, p_list)
+        break
 
 
     inputbox_file.close()
