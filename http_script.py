@@ -7,7 +7,6 @@ from scapy.all import *
 
 
 
-
 def input_text_box(driver, page, inputbox_list, result, error_list, query):
     print 'page : ', page
     driver.get(page)
