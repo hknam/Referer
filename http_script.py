@@ -8,21 +8,8 @@ from scapy.all import *
 
 
 
-def init_driver():
-    driver_path = ''
-    current_path = os.getcwd().split('/')[1]
-
-    if current_path == 'home':
-        driver_path = 'chromedriver/chromedriver_linux'
-    elif current_path == 'Users':
-        driver_path = 'chromedriver/chromedriver_mac'
-
-    driver = webdriver.Chrome(driver_path)
-    return driver
-
-
-
 def input_text_box(driver, page, inputbox_list, result, error_list, query):
+    print 'page : ', page
     driver.get(page)
     browser_url = ''
     for boxname in inputbox_list.split(","):
@@ -44,8 +31,9 @@ def input_text_box(driver, page, inputbox_list, result, error_list, query):
                 src_page=page.split('.')[1]
                 if href.startswith('http://'):
                     if href.find(src_page) < 0:
-                        print href
+                        print 'click link address : ', href
                         link.click()
+                        driver.implicitly_wait(10)
                         time.sleep(1)
                         break
 
@@ -58,7 +46,10 @@ def run(target, p_list, query):
         pkt = rdpcap(target)
     except MemoryError:
         print "Sorry - Memory Error"
-        sys.exit()
+        return
+    except scapy.error.Scapy_Exception:
+        print 'Not a pcap capture file (bad magic)'
+        return
     numPkt = len(pkt)
 
     print "Analyzing : " + target
@@ -79,7 +70,6 @@ def run(target, p_list, query):
                 p_dict['ack'] = layer.ack
                 p_dict['flags'] = layer.flags
 
-
             if layerName == "Raw":
                 result = processHTTP(layer.load, query)
                 for k,v in result.items():
@@ -96,20 +86,32 @@ def processHTTP(data, query):
             info['http']='request'
             info['method']=header.split()[0]
             info['uri']=header.split()[1]
+            if str(info['uri']).find(query) > 0:
+                print '=================='
+                print 'GET URI'
+                print str(info['uri'])
+                print '=================='+'\n'
+
         if header.startswith('POST'):
             info['http']='request'
             info['method']=header.split()[0]
             info['uri']=header.split()[1]
+        '''
         if header.startswith('HTTP'):
             info['http']='response'
             info['status']=header.split()[1]
+        '''
         if header.startswith('HOST') : info['host'] = header.split(':')[1]
-        if header.startswith('User-Agent') : info['user-agent'] = header.split(':',1)[1]
+        #if header.startswith('User-Agent') : info['user-agent'] = header.split(':',1)[1]
         if header.startswith('Referer') :
             info['referer'] = header.split(':',1)[1]
-            #print info['referer']
             if str(info['referer']).find(query) > 0:
-                print info['referer']
+                print '=================='
+                print 'Referer'
+                print str(info['referer']).strip()
+                print '==================' + '\n'
+
+                break
 
     return info
 
@@ -164,23 +166,19 @@ def main():
     query = 'iphone7'
 
     while True:
-
         page = page_list.readline()
         if not page:
             break
 
         file_name = 'pcapfile/'+browser+'/'+page.split('.')[0]+'_'+browser+'.pcap'
-        tcpdump_command = 'sudo tcpdump -i any -s 0 tcp port 80 -c 2000 -w '+file_name
+        tcpdump_command = 'sudo tcpdump -i any -s 0 tcp port 80 -c 300 -w '+file_name
 
         subprocess.Popen(tcpdump_command, shell=True, stdin=subprocess.PIPE)
 
         page = 'http://www.'+page.lower()
         input_text_box(driver, page, inputbox_list, result, error_list, query)
 
-
-        time.sleep(1)
-        run(file_name, p_list, query)
-        break
+        #run(file_name, p_list, query)
 
     page_list.close()
 
