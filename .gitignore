@@ -96,3 +96,9 @@ pcapfile/
 
 # pcap file
 .pcap
+
+#mac
+.DS_Store
+
+#idea
+.idea/*
